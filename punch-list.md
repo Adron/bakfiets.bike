@@ -77,7 +77,7 @@ DNSSEC is off, so the nameserver switch is safe. The `.bike` delegation TTL is 1
   - A redeploy was needed to purge the edge cache so `http://` → `https://` applied at `/`
   - The only unavoidable gap is between DNS reaching GitHub and that certificate being issued. WordPress sends HSTS, so returning visitors get a certificate error, not a plain-HTTP fallback, during those minutes.
   - Rollback: UPSERT the A records back to `192.0.78.24/25` and the `www` CNAME back to `bakfiets.bike`; it takes effect within 5 minutes.
-- [x] CAA added: `0 issue "letsencrypt.org"`, `0 issuewild ";"`
+- [ ] Add CAA records in Route 53: `0 issue "letsencrypt.org"` and `0 issuewild ";"` (not added yet: needs your approval)
 - [ ] Once it's been stable for a day or two: raise the A/AAAA/CNAME TTLs from 300 to 3600 (300 keeps rollback fast for now)
 
 ## After cutover
