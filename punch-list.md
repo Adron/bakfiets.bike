@@ -58,12 +58,12 @@ DNSSEC is off, so the nameserver switch is safe. The `.bike` delegation TTL is 1
   - `ns-1387.awsdns-45.org`
   - `ns-1563.awsdns-03.co.uk`
 - [x] Keep everything else on WordPress as is: the site, the plan, the domain connection, and auto-renew. WordPress.com keeps serving the site because the A records still point at it.
-- [ ] Confirm with `dig NS bakfiets.bike +trace`, then wait ~24h for resolvers to age out the old delegation
+- [x] Registry delegated to Route 53 at 15:17 PT; 1.1.1.1, 8.8.8.8, and 9.9.9.9 all return the Route 53 answers, and the WordPress site still serves (200)
 
 ### Phase 3: verify the domain with GitHub (any time in Phase 1 or 2)
 - [x] github.com/settings/pages → Add a domain → `bakfiets.bike` (pending verification)
 - [x] TXT `_github-pages-challenge-adron.bakfiets.bike` added to Route 53
-- [ ] Click Verify on GitHub once the `.bike` registry delegates to Route 53
+- [x] Domain verified on GitHub (github.com/settings/pages shows bakfiets.bike Verified)
 
 ### Phase 4: cutover to GitHub Pages (pick a quiet time)
 - [ ] Repo Settings → Pages → Custom domain `bakfiets.bike` (or `gh api -X PUT repos/Adron/bakfiets.bike/pages -f cname=bakfiets.bike`)
