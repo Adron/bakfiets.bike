@@ -1,0 +1,18 @@
+{%- comment -%}A post in a grid, as Fewer's query loop shows it. include.terms_first puts categories above the title (archive pages).{%- endcomment -%}
+{%- capture terms -%}
+  {%- if include.post.categories.size > 0 -%}
+  <div class="post-terms">
+    {%- for c in include.post.categories -%}
+      <a href="{{ c | slugify: 'latin' | prepend: '/category/' | append: '/' | relative_url }}">{{ c }}</a>{% unless forloop.last %}<span class="sep"> · </span>{% endunless %}
+    {%- endfor -%}
+  </div>
+  {%- endif -%}
+{%- endcapture -%}
+<li class="post-card">
+  {%- if include.post.image %}
+  <figure class="post-card-image"><a href="{{ include.post.url | relative_url }}" tabindex="-1" aria-hidden="true"><img src="{{ include.post.image | relative_url }}" alt="" loading="lazy"></a></figure>
+  {%- endif %}
+  {% if include.terms_first %}{{ terms }}{% endif %}
+  <h2 class="post-card-title{% if include.terms_first %} is-large{% endif %}"><a href="{{ include.post.url | relative_url }}">{{ include.post.title | escape }}</a></h2>
+  {% unless include.terms_first %}{{ terms }}{% endunless %}
+</li>

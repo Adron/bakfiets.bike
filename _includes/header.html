@@ -1,0 +1,15 @@
+<header class="site-header">
+  <div class="cols cols-nostack">
+    <div class="col w-33">
+      <p class="site-title"><a href="{{ '/' | relative_url }}">{{ site.title | escape }}</a></p>
+    </div>
+    <div class="col w-67">
+      <nav class="site-nav" aria-label="Main">
+        {%- for path in site.header_pages %}
+          {%- assign p = site.pages | where: "path", path | first %}
+          {%- if p %}<a href="{{ p.url | relative_url }}">{{ p.title | escape }}</a>{% endif %}
+        {%- endfor %}
+      </nav>
+    </div>
+  </div>
+</header>

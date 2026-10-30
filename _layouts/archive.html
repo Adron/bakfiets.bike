@@ -1,0 +1,25 @@
+---
+layout: default
+---
+{%- case page.type -%}
+  {%- when "category" -%}{%- assign heading = "Category: " | append: page.title -%}
+  {%- when "tag" -%}{%- assign heading = "Tag: " | append: page.title -%}
+  {%- when "year" -%}{%- assign heading = page.date | date: "Year: %Y" -%}
+  {%- when "month" -%}{%- assign heading = page.date | date: "Month: %B %Y" -%}
+  {%- else -%}{%- assign heading = page.date | date: "Day: %B %-d, %Y" -%}
+{%- endcase -%}
+<div class="archive">
+  <div class="cols">
+    <div class="col"><h1 class="page-title">{{ heading }}</h1></div>
+  </div>
+  <div class="cols">
+    <div class="col w-33"></div>
+    <div class="col w-67">
+      <ul class="post-grid">
+        {%- for post in page.posts %}
+          {%- include post-card.html post=post terms_first=true %}
+        {%- endfor %}
+      </ul>
+    </div>
+  </div>
+</div>

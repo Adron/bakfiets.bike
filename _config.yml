@@ -1,0 +1,53 @@
+title: Bakfiet Meets
+description: Cargo Carrying Crew - a blog for organizing cargo bike meet ups in the Seattle Metro.
+url: https://bakfiets.bike
+baseurl: "" # The Pages workflow overrides this for the adron.github.io/bakfiets.bike preview.
+lang: en_US
+author: Adron
+logo: /wp-content/uploads/2023/11/cropped-bakfiets-fam-logos_transparent-1.png
+
+# WordPress used Pacific time; keeping it means post dates (and so URLs) never shift a day.
+timezone: America/Los_Angeles
+
+# Matches the WordPress permalink structure, so new posts in _posts/YYYY-MM-DD-slug.md
+# get /YYYY/MM/DD/slug/ automatically. Imported posts also pin their exact URL in front matter.
+permalink: /:year/:month/:day/:title/
+
+# Layouts, includes and assets/css/fewer.css recreate the WordPress "Fewer" theme.
+footer_name: Adron Hall
+header_pages:
+  - about.md
+  - centered-heading-with-contact-form.md
+
+plugins:
+  - jekyll-archives
+  - jekyll-feed
+  - jekyll-seo-tag
+  - jekyll-sitemap
+
+defaults:
+  - scope:
+      type: posts
+    values:
+      layout: post
+      author: Adron
+
+# Recreates WordPress's category, tag and date archive URLs.
+jekyll-archives:
+  enabled: [categories, tags, year, month, day]
+  layout: archive
+  slug_mode: latin # "Riese & Müller" -> riese-muller, as WordPress slugged it
+  permalinks:
+    category: /category/:name/
+    tag: /tag/:name/
+    year: /:year/
+    month: /:year/:month/
+    day: /:year/:month/:day/
+
+exclude:
+  - scripts/
+  - README.md
+  - punch-list.md
+  - Gemfile
+  - Gemfile.lock
+  - vendor/
