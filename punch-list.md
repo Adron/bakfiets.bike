@@ -21,6 +21,19 @@ Goal: serve bakfiets.bike from this repo over HTTPS, with every existing URL sti
 - [x] Checked: every URL in the live WordPress sitemap (16) exists in the Jekyll build
 - [ ] Not reproducible on GitHub Pages (low value, accepting the loss): `?p=ID` links, `wp.me` shortlinks, `/comments/feed/`, image resize URLs like `?w=1024` (the base file still loads; the parameter is ignored)
 
+## Theme
+- [x] Identified the WordPress theme: Fewer (WordPress.com block theme by Automattic)
+- [x] Recreated it in Jekyll (layouts, includes, `assets/css/fewer.css`) and dropped Minima
+- [x] Self-hosted the Epilogue font (SIL OFL) instead of loading it from WordPress.com
+- [x] Home page: intro column (text ported from the WP template) + 2-up post grid, with the sticky post first
+- [x] Post page: categories/byline column, large title, excerpt lead-in, tags footer
+- [x] Image-beside-text (media & text) blocks kept with their original column widths
+- [x] Page, category/tag/date archive layouts match WordPress
+- [x] Checked against the live site at 1440px: post header, excerpt, and first media block positions match to the pixel; stacks for mobile like Fewer
+- [x] Jetpack email "Subscribe" button replaced with "Subscribe via RSS" (to `/feed/`)
+- [ ] Not carried over (WordPress/Jetpack-only): share buttons, likes, comment form, the mobile hamburger menu (the nav wraps instead), and the footer's "…" placeholder columns
+- [ ] Optional: re-add email subscriptions via a newsletter service if the Jetpack subscribers should keep getting posts
+
 ## GitHub Pages
 - [ ] Merge the Jekyll site to `main`
 - [ ] Enable Pages with source = GitHub Actions

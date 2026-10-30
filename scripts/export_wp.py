@@ -96,20 +96,38 @@ def liquid_url(site_path):
     return "{{ '" + site_path + "' | relative_url }}"
 
 
+MEDIA_TEXT_CLASSES = {"has-media-on-the-right", "is-stacked-on-mobile", "is-vertically-aligned-top",
+                      "is-vertically-aligned-center", "is-vertically-aligned-bottom", "is-image-fill"}
+
+
+def to_markdown(html_str):
+    md = markdownify(html_str, heading_style="ATX", bullets="-")
+    # Collapse the blank-line runs WordPress block markup leaves behind.
+    out = []
+    for line in (l.rstrip() for l in md.splitlines()):
+        if line or (out and out[-1]):
+            out.append(line)
+    return "\n".join(out).strip()
+
+
+def media_text_html(block):
+    """Keep a media-text block's side-by-side layout as HTML; its text stays Markdown."""
+    classes = ["wp-block-media-text"] + [c for c in block.get("class", []) if c in MEDIA_TEXT_CLASSES]
+    style = re.search(r"grid-template-columns:[^;\"]+", block.get("style", ""))
+    style_attr = f' style="{style.group(0)}"' if style else ""
+    img = block.select_one(".wp-block-media-text__media img")
+    content = block.select_one(".wp-block-media-text__content")
+    figure = f'<figure class="wp-block-media-text__media">{img}</figure>' if img else ""
+    text = f'<div class="wp-block-media-text__content" markdown="1">\n\n{to_markdown(content.decode_contents())}\n\n</div>' if content else ""
+    parts = [text, figure] if "has-media-on-the-right" in classes else [figure, text]
+    return f'<div class="{" ".join(classes)}"{style_attr}>\n' + "\n".join(p for p in parts if p) + "\n</div>"
+
+
 def convert_body(rendered):
     soup = BeautifulSoup(rendered, "html.parser")
     for sel in DROP_SELECTORS:
         for el in soup.select(sel):
             el.decompose()
-    # Flatten media-text blocks into image followed by text.
-    for block in soup.select(".wp-block-media-text"):
-        media = block.select_one(".wp-block-media-text__media")
-        content = block.select_one(".wp-block-media-text__content")
-        new = soup.new_tag("div")
-        for part in (media, content):
-            if part:
-                new.append(part.extract())
-        block.replace_with(new)
     for img in soup.find_all("img"):
         src = img.get("data-orig-file") or img["src"]
         img.attrs = {"src": liquid_url(download(src)), "alt": img.get("alt", "")}
@@ -117,13 +135,18 @@ def convert_body(rendered):
     for a in soup.find_all("a", href=True):
         if a["href"].startswith(SITE + "/"):
             a["href"] = liquid_url(a["href"][len(SITE):])
-    md = markdownify(str(soup), heading_style="ATX", bullets="-")
-    # Collapse the blank-line runs WordPress block markup leaves behind.
-    out = []
-    for line in (l.rstrip() for l in md.splitlines()):
-        if line or (out and out[-1]):
-            out.append(line)
-    return "\n".join(out).strip() + "\n"
+    # Swap media-text blocks for placeholders, convert the rest, then splice the HTML back in.
+    blocks = []
+    for block in soup.select(".wp-block-media-text"):
+        token = f"XXMEDIATEXT{len(blocks)}XX"
+        blocks.append((token, media_text_html(block)))
+        p = soup.new_tag("p")
+        p.string = token
+        block.replace_with(p)
+    md = to_markdown(str(soup))
+    for token, block_html in blocks:
+        md = md.replace(token, block_html)
+    return md + "\n"
 
 
 def featured_image(item):
@@ -165,6 +188,8 @@ def main():
             "description": clean_text(BeautifulSoup(p["excerpt"]["rendered"], "html.parser").get_text()),
             "wordpress_id": p["id"],
         }
+        if p.get("sticky"):
+            front["sticky"] = True  # pinned to the top of the home page, as on WordPress
         if image := featured_image(p):
             front["image"] = image
         write_markdown(ROOT / "_posts" / f"{p['date'][:10]}-{p['slug']}.md", front, convert_body(p["content"]["rendered"]))

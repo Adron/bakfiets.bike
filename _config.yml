@@ -13,9 +13,8 @@ timezone: America/Los_Angeles
 # get /YYYY/MM/DD/slug/ automatically. Imported posts also pin their exact URL in front matter.
 permalink: /:year/:month/:day/:title/
 
-theme: minima
-minima:
-  date_format: "%B %-d, %Y"
+# Layouts, includes and assets/css/fewer.css recreate the WordPress "Fewer" theme.
+footer_name: Adron Hall
 header_pages:
   - about.md
   - centered-heading-with-contact-form.md

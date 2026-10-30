@@ -1,14 +1,13 @@
 <head>
   <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  {%- if site.baseurl != "" -%}
-  {%- comment -%}Keep the github.io preview out of search results; only bakfiets.bike should be indexed.{%- endcomment -%}
+  {%- if site.baseurl != "" %}
+  {%- comment -%}Keep the github.io preview out of search results; only bakfiets.bike should be indexed.{%- endcomment %}
   <meta name="robots" content="noindex">
-  {%- endif -%}
-  {%- seo -%}
+  {%- endif %}
+  {% seo %}
   <link rel="icon" href="{{ site.logo | relative_url }}">
-  <link rel="stylesheet" href="{{ "/assets/main.css" | relative_url }}">
-  <link rel="stylesheet" href="{{ "/assets/site.css" | relative_url }}">
-  {%- feed_meta -%}
+  <link rel="preload" href="{{ '/assets/fonts/epilogue-latin.woff2' | relative_url }}" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="{{ '/assets/css/fewer.css' | relative_url }}">
+  {% feed_meta %}
 </head>

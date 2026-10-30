@@ -1,0 +1,19 @@
+---
+layout: default
+---
+{%- assign pinned = site.posts | where: "sticky", true -%}
+{%- assign rest = site.posts | where_exp: "p", "p.sticky != true" -%}
+{%- assign posts = pinned | concat: rest -%}
+<div class="cols">
+  <div class="col w-33 home-intro">
+    {{ content }}
+    <p class="subscribe"><a class="button" href="{{ '/feed/' | relative_url }}">Subscribe via RSS</a></p>
+  </div>
+  <div class="col w-67">
+    <ul class="post-grid">
+      {%- for post in posts %}
+        {%- include post-card.html post=post %}
+      {%- endfor %}
+    </ul>
+  </div>
+</div>

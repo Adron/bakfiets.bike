@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="{{ site.lang | default: 'en' | replace: '_', '-' }}">
+{%- include head.html -%}
+<body>
+  <a class="skip-link" href="#content">Skip to content</a>
+  {%- include header.html -%}
+  <div class="spacer-80" aria-hidden="true"></div>
+  <main id="content">
+    {{ content }}
+  </main>
+  {%- include footer.html -%}
+</body>
+</html>

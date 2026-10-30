@@ -27,6 +27,29 @@ published post's filename or date, because that changes its URL. Category and ta
 Put images under `wp-content/uploads/YYYY/MM/` and strip location data first:
 `exiftool -overwrite_original -gps:all= photo.jpeg`.
 
+## Theme
+
+The look recreates the WordPress.com **Fewer** theme the site used on WordPress: Epilogue (self-hosted
+in `assets/fonts/`), the off-white palette, and the 1/3 + 2/3 column layouts. It lives in
+`_layouts/`, `_includes/`, and `assets/css/fewer.css`, with no theme gem. The home page intro
+text is in `index.md`.
+
+For an image beside text, like the WordPress media-and-text block, use:
+
+```html
+<div class="wp-block-media-text is-stacked-on-mobile" style="grid-template-columns:25% auto">
+<figure class="wp-block-media-text__media"><img src="{{ '/wp-content/uploads/2026/10/photo.jpeg' | relative_url }}" alt=""></figure>
+<div class="wp-block-media-text__content" markdown="1">
+
+Markdown text here.
+
+</div>
+</div>
+```
+
+Add `has-media-on-the-right` (and put the text `div` first) to flip it. Set `sticky: true` in a
+post's front matter to pin it first on the home page.
+
 ## Local preview
 
 ```sh
