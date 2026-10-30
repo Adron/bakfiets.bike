@@ -1,0 +1,21 @@
+---
+layout: default
+---
+{%- case page.type -%}
+  {%- when "category" -%}{%- assign heading = "Category: " | append: page.title -%}
+  {%- when "tag" -%}{%- assign heading = "Tag: " | append: page.title -%}
+  {%- when "year" -%}{%- assign heading = page.date | date: "%Y" -%}
+  {%- when "month" -%}{%- assign heading = page.date | date: "%B %Y" -%}
+  {%- else -%}{%- assign heading = page.date | date: "%B %-d, %Y" -%}
+{%- endcase -%}
+<div class="home">
+  <h1 class="page-heading">{{ heading }}</h1>
+  <ul class="post-list">
+    {%- for post in page.posts -%}
+    <li>
+      <span class="post-meta">{{ post.date | date: site.minima.date_format }}</span>
+      <h3><a class="post-link" href="{{ post.url | relative_url }}">{{ post.title | escape }}</a></h3>
+    </li>
+    {%- endfor -%}
+  </ul>
+</div>
