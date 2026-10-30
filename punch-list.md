@@ -40,22 +40,46 @@ Goal: serve bakfiets.bike from this repo over HTTPS, with every existing URL sti
 - [ ] Confirm the workflow deploys and the preview renders at https://adron.github.io/bakfiets.bike/
 - [ ] Review the preview: home, both posts, both pages, a category page, a tag page, `/feed/`
 
-## Domain + HTTPS (needs WordPress.com and GitHub account access)
-- [ ] Find where the domain is registered (DNS is on WordPress.com nameservers; likely registered through WordPress.com). Decide: keep the registration at WP.com and edit DNS there, or transfer the domain to another registrar
-- [ ] Export the Jetpack subscriber list from WordPress.com (email subscribers won't carry over automatically)
-- [ ] Verify the domain on GitHub: Settings → Pages → Add a domain → add the `_github-pages-challenge-adron` TXT record
-- [ ] Lower the DNS TTL ahead of the cutover, if the DNS host allows it
-- [ ] Cutover DNS:
-  - [ ] Remove the WordPress A records `192.0.78.24` and `192.0.78.25`
-  - [ ] Apex A: `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`
-  - [ ] Apex AAAA: `2606:50c0:8000::153`, `2606:50c0:8001::153`, `2606:50c0:8002::153`, `2606:50c0:8003::153`
-  - [ ] `www` CNAME → `adron.github.io`
-- [ ] Repo Settings → Pages → Custom domain: `bakfiets.bike` (the next deploy then builds with an empty baseurl, so the preview's `noindex` drops off automatically)
-- [ ] Wait for the DNS check and the Let's Encrypt certificate, then tick **Enforce HTTPS**
-- [ ] Re-run the workflow after the custom domain is set (Actions → Deploy → Run workflow) so the build picks up the new base path
+## Domain + HTTPS: WordPress.com DNS → Route 53 → GitHub Pages
+
+Facts (checked 2026-10-30): registrar is Automattic (WordPress.com), and the registration runs to 2027-11-19.
+DNSSEC is off, so the nameserver switch is safe. The `.bike` delegation TTL is 1h. No MX or email records.
+
+### Phase 1: Route 53 zone mirrors WordPress (no visible change)
+- [x] Hosted zone `bakfiets.bike` created: `Z083035615ECSAEEABKSY` (AWS account 196936048600)
+- [x] Mirrored records: apex A `192.0.78.24`, `192.0.78.25` (TTL 300); `www` CNAME → `bakfiets.bike` (TTL 300)
+- [x] Verified the Route 53 nameservers answer identically to `ns1.wordpress.com`
+- [x] Skipped `_domainconnect` TXT (WordPress.com-only helper)
+
+### Phase 2: switch nameservers at WordPress.com (no downtime: both sides serve the same answers)
+- [ ] WordPress.com → Upgrades → Domains → bakfiets.bike → Name servers → "Use custom name servers":
+  - `ns-138.awsdns-17.com`
+  - `ns-593.awsdns-10.net`
+  - `ns-1387.awsdns-45.org`
+  - `ns-1563.awsdns-03.co.uk`
+- [ ] Keep everything else on WordPress as is: the site, the plan, the domain connection, and auto-renew. WordPress.com keeps serving the site because the A records still point at it.
+- [ ] Confirm with `dig NS bakfiets.bike +trace`, then wait ~24h for resolvers to age out the old delegation
+
+### Phase 3: verify the domain with GitHub (any time in Phase 1 or 2)
+- [ ] github.com/settings/pages → Add a domain → `bakfiets.bike` → copy the `_github-pages-challenge-adron` TXT value
+- [ ] Add that TXT record in Route 53 and click Verify on GitHub
+
+### Phase 4: cutover to GitHub Pages (pick a quiet time)
+- [ ] Repo Settings → Pages → Custom domain `bakfiets.bike` (or `gh api -X PUT repos/Adron/bakfiets.bike/pages -f cname=bakfiets.bike`)
+- [ ] Re-run the Pages workflow so it builds with an empty base path (this also drops the preview `noindex`)
+- [ ] Route 53 UPSERT, TTL 300:
+  - Apex A: `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`
+  - Apex AAAA: `2606:50c0:8000::153`, `2606:50c0:8001::153`, `2606:50c0:8002::153`, `2606:50c0:8003::153`
+  - `www` CNAME → `adron.github.io`
+- [ ] Wait for GitHub's Let's Encrypt certificate (usually 5–30 min), then tick **Enforce HTTPS**
+  - The only unavoidable gap is between DNS reaching GitHub and that certificate being issued. WordPress sends HSTS, so returning visitors get a certificate error, not a plain-HTTP fallback, during those minutes.
+  - Rollback: UPSERT the A records back to `192.0.78.24/25` and the `www` CNAME back to `bakfiets.bike`; it takes effect within 5 minutes.
+- [ ] After it's stable: CAA `0 issue "letsencrypt.org"` and raise TTLs to 3600
 
 ## After cutover
+- [ ] Optional: Route 53 query logging (CloudWatch Logs in us-east-1, KMS-encrypted) and DNSSEC signing for the zone
+- [ ] Optional: transfer the registration to Route 53 Domains ($43, adds a year). Unlock it and get the auth code at WordPress.com first.
+- [ ] Don't cancel the WordPress.com plan, remove the domain from the site, or turn off auto-renew until GitHub has served the site cleanly for a while. Then make the WordPress site private (Settings → Privacy) so `bakfiet.wordpress.com` can't serve a duplicate copy.
 - [ ] Spot-check the post URLs, `/about/`, `/feed/`, a `/wp-content/uploads/...` image, and `http://` → `https://` and `www` → apex redirects
 - [ ] Google Search Console: verify the domain (DNS TXT), submit `https://bakfiets.bike/sitemap.xml`, watch Coverage for 404s
 - [ ] Contact page: replace the old WordPress form with a `mailto:` link or a form service (Formspree, etc.) if wanted
-- [ ] Cancel the WordPress.com hosting plan only after the cutover is confirmed, and keep the domain registration renewing
